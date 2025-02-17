@@ -68,6 +68,7 @@ void InitGame()
 
 void UpdateGame()
 {
+    // test
     placingCell.Update(cells);
 
     if (std::size(cells) != 0)
