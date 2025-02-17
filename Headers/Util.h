@@ -13,7 +13,7 @@ struct GridPos
     int y{};
 };
 
-struct MouseProps
+struct GridConversions
 {
     static GridPos GetWorldToGridSpace(const Vector2& pos, const int cellSize)
     {

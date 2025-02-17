@@ -24,11 +24,11 @@ public:
         m_color = color;
     }
 
-    void Update(std::vector<Cell*>& cells)
+    void Update(std::vector<Cell*>& cells, Camera2D camera)
     {
         if (m_beingPlaced)
         {
-            m_pos = MouseProps::GetWorldGridNormalized(GetMousePosition(), cellSize);
+            m_pos = GridConversions::GetWorldGridNormalized(GetScreenToWorld2D(GetMousePosition(), camera), cellSize);
 
             if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
             {
@@ -92,23 +92,25 @@ public:
         m_isHorizontal = isHorizontal;
     }
 
-    void Draw() const
+    void Draw(Vector2 cameraPos) const
     {
+        const float gridScreenOffset{ 1500.0f };
+
         for (int i{0}; i <= m_gridLineAmount-1; ++i)
         {
             if (m_isHorizontal)
             {
                 DrawLineEx(
-                    Vector2(0.0f, (float)Cell::cellSize * (float)i),
-                    Vector2((float)GetScreenWidth(), (float)Cell::cellSize * (float)i),
+                    GridConversions::GetWorldGridNormalized(Vector2((0.0f + cameraPos.x) - gridScreenOffset, (float)Cell::cellSize * (float)i + cameraPos.y - gridScreenOffset), Cell::cellSize),
+                    GridConversions::GetWorldGridNormalized(Vector2((float)GetScreenWidth() * (float)m_gridLineAmount + cameraPos.x, (float)Cell::cellSize * (float)i + cameraPos.y - gridScreenOffset), Cell::cellSize),
                     m_thickness,
                     m_color
                 );
             } else
             {
                 DrawLineEx(
-                     Vector2((float)Cell::cellSize * (float)i, 0.0f),
-                     Vector2((float)Cell::cellSize * (float)i, (float)GetScreenHeight()),
+                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + cameraPos.x - gridScreenOffset, 0.0f + cameraPos.y - gridScreenOffset), Cell::cellSize),
+                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + cameraPos.x - gridScreenOffset, (float)GetScreenHeight() * (float)m_gridLineAmount + cameraPos.y), Cell::cellSize),
                      m_thickness,
                      m_color
                  );

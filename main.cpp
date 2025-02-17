@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 
+#include "raymath.h"
 #include "Headers/RaylibOverloads.h"
 #include "Headers/Util.h"
 #include "Headers/Components.h"
@@ -11,8 +12,15 @@ int Cell::cellSize = 25;
 
 std::vector<Cell*> cells{};
 
-constexpr int screenWidth { 800 };
-constexpr int screenHeight { 450 };
+// CAMERA
+Camera2D camera{};
+Vector2 cameraPos{};
+constexpr float mouseWheelMax{ 5.0f };
+constexpr float mouseWheelMin{ 0.3f };
+float currentMouseZoom{ 1.0f };
+
+constexpr int screenWidth { 1000 };
+constexpr int screenHeight { 700 };
 constexpr int targetFPS{ 60 };
 
 static void InitGame();
@@ -25,15 +33,15 @@ constexpr float cellSize = 25.0f;
 
 // Components Init
 GridLine gridLineVertical{
-    40,
-    2.0f,
+    1000,
+    5.0f,
     LIGHTGRAY,
     false
 };
 
 GridLine gridLineHorizontal{
-    40,
-    2.0f,
+    1000,
+    5.0f,
     LIGHTGRAY,
     true
 };
@@ -42,11 +50,13 @@ Cell placingCell{true, Color{255, 94, 94, 100}};
 
 int main()
 {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    //SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenWidth, screenHeight, "Game of Life");
 
-    Camera2D camera{0};
-    camera.zoom = 10.0f;
+    // CAMERA PROPS
+    camera.target = { screenWidth/2.0, screenHeight/2.0f};
+    camera.offset = { screenWidth/2.0, screenHeight/2.0f};
+    camera.rotation = 0.0f;
 
     InitGame();
 
@@ -68,35 +78,58 @@ void InitGame()
 
 void UpdateGame()
 {
-    // test
-    placingCell.Update(cells);
+    placingCell.Update(cells, camera);
 
     if (std::size(cells) != 0)
     {
         for (Cell* cell : cells)
         {
-            cell->Update(cells);
+            cell->Update(cells, camera);
         }
     }
+
+    // CAMERA
+    // MOVEMENT
+    if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+    {
+        Vector2 delta = GetMouseDelta();
+        delta = Vector2Scale(delta, -1.0f/camera.zoom);
+        camera.target = Vector2Add(camera.target, delta);
+    }
+
+    cameraPos = camera.target - camera.offset;
+
+    // ZOOMING
+    currentMouseZoom += GetMouseWheelMove() * ((sin(currentMouseZoom)/2 + 0.5f)/mouseWheelMax);
+    if (currentMouseZoom >= mouseWheelMax)
+        currentMouseZoom = mouseWheelMax;
+    if (currentMouseZoom <= mouseWheelMin)
+        currentMouseZoom = mouseWheelMin;
+
+    camera.zoom = currentMouseZoom;
 }
 
 void DrawGame()
 {
     BeginDrawing();
+
+        BeginMode2D(camera);
     
         ClearBackground(RAYWHITE);
-        gridLineVertical.Draw();
-        gridLineHorizontal.Draw();
+        gridLineVertical.Draw(cameraPos);
+        gridLineHorizontal.Draw(cameraPos);
 
         placingCell.Draw();
 
-    if (std::size(cells) != 0)
-    {
-        for (const Cell* cell : cells)
+        if (std::size(cells) != 0)
         {
-            cell->Draw();
+            for (const Cell* cell : cells)
+            {
+                cell->Draw();
+            }
         }
-    }
+
+        EndMode2D();
 
     EndDrawing();
 }
