@@ -1,0 +1,22 @@
+# Ignore build artifacts
+/build/
+/cmake-build-debug/
+/cmake-build-release/
+*.o
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+
+# Ignore CMake cache and logs
+CMakeCache.txt
+CMakeFiles/
+
+# Ignore CLion project files (optional)
+.idea/
+*.iml
+
+# Ignore Raylib source if it's included
+raylib/
+raylib-*
