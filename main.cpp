@@ -33,14 +33,14 @@ constexpr float cellSize = 25.0f;
 
 // Components Init
 GridLine gridLineVertical{
-    1000,
+    400,
     5.0f,
     LIGHTGRAY,
     false
 };
 
 GridLine gridLineHorizontal{
-    1000,
+    400,
     5.0f,
     LIGHTGRAY,
     true
@@ -107,6 +107,10 @@ void UpdateGame()
         currentMouseZoom = mouseWheelMin;
 
     camera.zoom = currentMouseZoom;
+
+    // GRID
+    gridLineHorizontal.currentMouseZoom = currentMouseZoom;
+    gridLineVertical.currentMouseZoom = currentMouseZoom;
 }
 
 void DrawGame()

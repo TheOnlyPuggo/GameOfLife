@@ -79,6 +79,8 @@ private:
     bool m_isHorizontal{};
 
 public:
+    float currentMouseZoom{};
+
     explicit GridLine(
         const int gridLineAmount,
         const float thickness,
@@ -94,9 +96,11 @@ public:
 
     void Draw(Vector2 cameraPos) const
     {
-        const float gridScreenOffset{ 1500.0f };
+        constexpr float gridScreenOffset{ 1500.0f };
+        const float spawnGridAmount = (float)m_gridLineAmount * (1/currentMouseZoom);
+        std::cout << (int)spawnGridAmount << '\n';
 
-        for (int i{0}; i <= m_gridLineAmount-1; ++i)
+        for (int i{0}; i <= (int)spawnGridAmount-1; ++i)
         {
             if (m_isHorizontal)
             {
