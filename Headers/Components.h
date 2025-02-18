@@ -94,7 +94,7 @@ public:
 
     void Draw(const GameCamera& game_camera) const
     {
-        constexpr float gridScreenOffset{ 1500.0f };
+        constexpr float gridScreenOffset{ 2500.0f };
         const float spawnGridAmount = (float)m_gridLineAmount * (1/game_camera.GetCurrentMouseZoom());
 
         for (int i{0}; i <= (int)spawnGridAmount-1; ++i)
@@ -102,8 +102,16 @@ public:
             if (m_isHorizontal)
             {
                 DrawLineEx(
-                    GridConversions::GetWorldGridNormalized(Vector2((0.0f + game_camera.m_cameraPos.x) - gridScreenOffset, (float)Cell::cellSize * (float)i + game_camera.m_cameraPos.y - gridScreenOffset), Cell::cellSize),
-                    GridConversions::GetWorldGridNormalized(Vector2((float)GetScreenWidth() * (float)m_gridLineAmount + game_camera.m_cameraPos.x, (float)Cell::cellSize * (float)i + game_camera.m_cameraPos.y - gridScreenOffset), Cell::cellSize),
+                    GridConversions::GetWorldGridNormalized(
+                        Vector2((0.0f + game_camera.m_cameraPos.x) - gridScreenOffset,
+                        (float)Cell::cellSize * (float)i + game_camera.m_cameraPos.y - gridScreenOffset),
+                        Cell::cellSize
+                    ),
+                    GridConversions::GetWorldGridNormalized(
+                        Vector2((float)GetScreenWidth() * (float)m_gridLineAmount + game_camera.m_cameraPos.x,
+                        (float)Cell::cellSize * (float)i + game_camera.m_cameraPos.y - gridScreenOffset),
+                        Cell::cellSize
+                    ),
                     m_thickness,
                     m_color
                 );

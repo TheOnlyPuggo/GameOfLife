@@ -48,7 +48,7 @@ Cell placingCell{true, Color{255, 94, 94, 100}};
 
 int main()
 {
-    //SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenWidth, screenHeight, "Game of Life");
 
     InitGame();
@@ -136,7 +136,3 @@ void UpdateDrawFrame()
     UpdateGame();
     DrawGame();
 }
-
-
-
-

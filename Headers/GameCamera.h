@@ -42,6 +42,7 @@ public:
             m_currentMouseZoom = m_mouseWheelMin;
 
         m_camera.zoom = m_currentMouseZoom;
+        m_camera.offset = Vector2{ (float)GetScreenWidth()/2.0f, (float)GetScreenHeight()/2.0f};
     }
 
     float GetCurrentMouseZoom() const
