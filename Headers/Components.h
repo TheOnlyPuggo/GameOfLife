@@ -68,13 +68,13 @@ public:
 
     void Draw(const GameCamera& gameCamera) const
     {
-        Vector2 cameraToGridPos{ gameCamera.m_cameraPos - GridConversions::GetGridToWorldSpace(m_gridPos, cellSize) };
+        Vector2 cameraToGridPos{ (gameCamera.m_cameraPos + gameCamera.m_camera.offset) - GridConversions::GetGridToWorldSpace(m_gridPos, cellSize) };
         float despawnDistanceMod{ m_despawnDistance * 1/gameCamera.GetCurrentMouseZoom() };
 
-        if ( // Checks if both x and y of cameraToGrisPos is greater than despawnDistanceMod and m_beingPlaces is not true
+        if ( // Checks if both x or y of cameraToGrisPos is greater than despawnDistanceMod and m_beingPlaces is not true
             !(
-                (cameraToGridPos.x > despawnDistanceMod || cameraToGridPos.x < -despawnDistanceMod)
-                && (cameraToGridPos.y > despawnDistanceMod || cameraToGridPos.y < -despawnDistanceMod)
+                ((cameraToGridPos.x > despawnDistanceMod || cameraToGridPos.x < -despawnDistanceMod)
+                || (cameraToGridPos.y > despawnDistanceMod || cameraToGridPos.y < -despawnDistanceMod))
                 && !m_beingPlaced)
             )
         {
