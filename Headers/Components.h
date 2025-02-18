@@ -25,7 +25,7 @@ public:
 
     GridPos m_gridPos{};
 
-    Cell(const bool beingPlaced, const Color color, float despawnDistance)
+    Cell(const bool beingPlaced, const Color color, const float despawnDistance)
     {
         m_beingPlaced = beingPlaced;
         m_color = color;
@@ -174,14 +174,21 @@ private:
     bool m_btnHovered{false};
 
 public:
-    Vector2 m_btnPos{};
+    enum ButtonFunction
+    {
+        CLEAR_CELLS, STEP_BACK, STEP_FORWARD
+    };
 
-    Button(std::string_view texturePath, Rectangle sourceRec, int scaleWidthMulti, int scaleHeightMulti)
+    Vector2 m_btnPos{};
+    ButtonFunction m_buttonFunction{};
+
+    Button(std::string_view texturePath, Rectangle sourceRec, int scaleWidthMulti, int scaleHeightMulti, ButtonFunction buttonFunction)
     {
         m_texturePath = texturePath;
         m_sourceRec = sourceRec;
         m_scaleWidthMulti = scaleWidthMulti;
         m_scaleHeightMulti = scaleHeightMulti;
+        m_buttonFunction = buttonFunction;
     }
 
     void Init()
@@ -191,7 +198,7 @@ public:
         m_texture.width *= m_scaleHeightMulti;
     }
 
-    void Update(std::vector<Cell*>& cells)
+    void Update(const std::vector<Cell*>& cells, int& currentStep)
     {
         m_btnBounds = Rectangle{ m_btnPos.x, m_btnPos.y, m_sourceRec.width, m_sourceRec.height };
 
@@ -202,13 +209,21 @@ public:
         }
         else
         {
-            m_btnHovered = false;
-            Cell::placingActive = true;
+            if (m_btnHovered)
+            {
+                Cell::placingActive = true;
+                m_btnHovered = false;
+            }
         }
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && m_btnHovered)
         {
-            RemoveAllCells(cells);
+            if (m_buttonFunction == CLEAR_CELLS)
+                RemoveAllCells(cells);
+            else if (m_buttonFunction == STEP_BACK)
+                DecrementStep(currentStep);
+            else if (m_buttonFunction == STEP_FORWARD)
+                IncrementStep(currentStep);
         }
     }
 
@@ -220,12 +235,12 @@ public:
             DrawTextureRec(m_texture, m_sourceRec, (Vector2){m_btnBounds.x, m_btnBounds.y}, Color(255/2,255/2,255/2,100));
     }
 
-    float GetWidth()
+    float GetWidth() const
     {
         return m_sourceRec.width;
     }
 
-    float GetHeight()
+    float GetHeight() const
     {
         return m_sourceRec.height;
     }
@@ -237,6 +252,17 @@ public:
         {
             cell->markedForDeletion = true;
         }
+    }
+
+    static void IncrementStep(int& currentStep)
+    {
+        ++currentStep;
+    }
+
+    static void DecrementStep(int& currentStep)
+    {
+        if (currentStep != 0)
+            --currentStep;
     }
 };
 

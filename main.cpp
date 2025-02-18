@@ -14,6 +14,8 @@
 int Cell::cellSize = 25;
 bool Cell::placingActive = true;
 
+int currentStep{0};
+
 std::vector<Cell*> cells{};
 
 constexpr int screenWidth { 1000 };
@@ -50,11 +52,28 @@ Cell placingCell{true, Color{255, 94, 94, 100}, 0.0f};
 
 std::vector<Button*> buttons{};
 
+Button* stepBackButton = new Button{
+    "../Assets/step-back.png",
+    Rectangle(0.0f, 0.0f, 64.0f, 64.0f),
+    2,
+    2,
+    Button::STEP_BACK
+};
+
+Button* stepForwardButton = new Button{
+    "../Assets/step-forward.png",
+    Rectangle(0.0f, 0.0f, 64.0f, 64.0f),
+    2,
+    2,
+    Button::STEP_FORWARD
+};
+
 Button* clearButton = new Button{
     "../Assets/bin-icon.png",
     Rectangle(0.0f, 0.0f, 64.0f, 64.0f),
     2,
-    2
+    2,
+    Button::CLEAR_CELLS
 };
 
 int main()
@@ -78,13 +97,19 @@ int main()
 void InitGame()
 {
     gameCamera.Init();
+    stepBackButton->Init();
+    stepForwardButton->Init();
     clearButton->Init();
 
+    buttons.push_back(stepBackButton);
+    buttons.push_back(stepForwardButton);
     buttons.push_back(clearButton);
 }
 
 void UpdateGame()
 {
+    std::cout << currentStep << '\n';
+
     placingCell.Update(cells, gameCamera.m_camera);
 
     if (std::size(cells) != 0)
@@ -111,11 +136,13 @@ void UpdateGame()
     gameCamera.Update();
 
     // BUTTON STUFF
-    clearButton->Update(cells);
+    clearButton->Update(cells, currentStep);
+    stepBackButton->Update(cells, currentStep);
+    stepForwardButton->Update(cells, currentStep);
 
     int i{0};
-    const float margin{40.0f};
-    const float distanceFromBottom{80.0f};
+    constexpr float margin{40.0f};
+    constexpr float distanceFromBottom{80.0f};
     const float totalButtonsLength{(buttons[0]->GetWidth() + margin) * (float)std::size(buttons)};
     for (Button* button : buttons)
     {
@@ -126,9 +153,6 @@ void UpdateGame()
 
         ++i;
     }
-
-    //std::cout << i << '\n';
-
 }
 
 void DrawGame()
@@ -154,6 +178,8 @@ void DrawGame()
     EndMode2D();
 
     clearButton->Draw();
+    stepBackButton->Draw();
+    stepForwardButton->Draw();
 
     EndDrawing();
 }
