@@ -35,6 +35,13 @@ public:
     {
         m_cameraPos = m_camera.target - m_camera.offset;
 
+        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+        {
+            Vector2 delta = GetMouseDelta();
+            delta = Vector2Scale(delta, -1.0f/m_camera.zoom);
+            m_camera.target = Vector2Add(m_camera.target, delta);
+        }
+
         m_currentMouseZoom += GetMouseWheelMove() * ((sin(m_currentMouseZoom)/2 + 0.5f)/(m_currentMouseZoom * 10));
         if (m_currentMouseZoom >= m_mouseWheelMax)
             m_currentMouseZoom = m_mouseWheelMax;

@@ -5,7 +5,10 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
+#include <string_view>
 #include <raylib.h>
+
+#include "GameCamera.h"
 
 class Cell
 {
@@ -16,6 +19,9 @@ private:
 
 public:
     static int cellSize;
+    static bool placingActive;
+
+    mutable bool markedForDeletion{false};
 
     GridPos m_gridPos{};
 
@@ -28,7 +34,7 @@ public:
 
     void Update(std::vector<Cell*>& cells, const Camera2D &camera)
     {
-        if (m_beingPlaced)
+        if (m_beingPlaced && placingActive)
         {
             m_gridPos = GridConversions::GetWorldToGridSpace(GetScreenToWorld2D(GetMousePosition(), camera), cellSize);
 
@@ -98,7 +104,7 @@ private:
     bool m_isHorizontal{};
 
 public:
-    explicit GridLine(
+    GridLine(
         const int gridLineAmount,
         const float thickness,
         const Color color,
@@ -151,6 +157,85 @@ public:
                      m_color
                  );
             }
+        }
+    }
+};
+
+class Button
+{
+private:
+    std::string_view m_texturePath{};
+    Rectangle m_sourceRec{};
+    int m_scaleWidthMulti{};
+    int m_scaleHeightMulti{};
+
+    Rectangle m_btnBounds{};
+    Texture2D m_texture{};
+    bool m_btnHovered{false};
+
+public:
+    Vector2 m_btnPos{};
+
+    Button(std::string_view texturePath, Rectangle sourceRec, int scaleWidthMulti, int scaleHeightMulti)
+    {
+        m_texturePath = texturePath;
+        m_sourceRec = sourceRec;
+        m_scaleWidthMulti = scaleWidthMulti;
+        m_scaleHeightMulti = scaleHeightMulti;
+    }
+
+    void Init()
+    {
+        m_texture = LoadTexture(m_texturePath.data());
+        m_texture.height *= m_scaleWidthMulti;
+        m_texture.width *= m_scaleHeightMulti;
+    }
+
+    void Update(std::vector<Cell*>& cells)
+    {
+        m_btnBounds = Rectangle{ m_btnPos.x, m_btnPos.y, m_sourceRec.width, m_sourceRec.height };
+
+        if (CheckCollisionPointRec(GetMousePosition(), m_btnBounds))
+        {
+            m_btnHovered = true;
+            Cell::placingActive = false;
+        }
+        else
+        {
+            m_btnHovered = false;
+            Cell::placingActive = true;
+        }
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && m_btnHovered)
+        {
+            RemoveAllCells(cells);
+        }
+    }
+
+    void Draw()
+    {
+        if (!m_btnHovered)
+            DrawTextureRec(m_texture, m_sourceRec, (Vector2){m_btnBounds.x, m_btnBounds.y}, WHITE);
+        else
+            DrawTextureRec(m_texture, m_sourceRec, (Vector2){m_btnBounds.x, m_btnBounds.y}, Color(255/2,255/2,255/2,100));
+    }
+
+    float GetWidth()
+    {
+        return m_sourceRec.width;
+    }
+
+    float GetHeight()
+    {
+        return m_sourceRec.height;
+    }
+
+    // BUTTON FUNCTIONS
+    static void RemoveAllCells(const std::vector<Cell*>& cells)
+    {
+        for (const Cell* cell : cells)
+        {
+            cell->markedForDeletion = true;
         }
     }
 };
