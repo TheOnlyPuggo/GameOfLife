@@ -24,7 +24,8 @@ endif ()
 add_executable(GameOfLife main.cpp
         Headers/RaylibOverloads.h
         Headers/Util.h
-        Headers/Components.h)
+        Headers/Components.h
+        Headers/GameCamera.h)
 
 target_include_directories(GameOfLife PRIVATE ${raylib_INCLUDE_DIRS})
 

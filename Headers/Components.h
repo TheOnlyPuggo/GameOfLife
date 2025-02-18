@@ -79,8 +79,6 @@ private:
     bool m_isHorizontal{};
 
 public:
-    float currentMouseZoom{};
-
     explicit GridLine(
         const int gridLineAmount,
         const float thickness,
@@ -94,27 +92,26 @@ public:
         m_isHorizontal = isHorizontal;
     }
 
-    void Draw(Vector2 cameraPos) const
+    void Draw(const GameCamera& game_camera) const
     {
         constexpr float gridScreenOffset{ 1500.0f };
-        const float spawnGridAmount = (float)m_gridLineAmount * (1/currentMouseZoom);
-        std::cout << (int)spawnGridAmount << '\n';
+        const float spawnGridAmount = (float)m_gridLineAmount * (1/game_camera.GetCurrentMouseZoom());
 
         for (int i{0}; i <= (int)spawnGridAmount-1; ++i)
         {
             if (m_isHorizontal)
             {
                 DrawLineEx(
-                    GridConversions::GetWorldGridNormalized(Vector2((0.0f + cameraPos.x) - gridScreenOffset, (float)Cell::cellSize * (float)i + cameraPos.y - gridScreenOffset), Cell::cellSize),
-                    GridConversions::GetWorldGridNormalized(Vector2((float)GetScreenWidth() * (float)m_gridLineAmount + cameraPos.x, (float)Cell::cellSize * (float)i + cameraPos.y - gridScreenOffset), Cell::cellSize),
+                    GridConversions::GetWorldGridNormalized(Vector2((0.0f + game_camera.m_cameraPos.x) - gridScreenOffset, (float)Cell::cellSize * (float)i + game_camera.m_cameraPos.y - gridScreenOffset), Cell::cellSize),
+                    GridConversions::GetWorldGridNormalized(Vector2((float)GetScreenWidth() * (float)m_gridLineAmount + game_camera.m_cameraPos.x, (float)Cell::cellSize * (float)i + game_camera.m_cameraPos.y - gridScreenOffset), Cell::cellSize),
                     m_thickness,
                     m_color
                 );
             } else
             {
                 DrawLineEx(
-                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + cameraPos.x - gridScreenOffset, 0.0f + cameraPos.y - gridScreenOffset), Cell::cellSize),
-                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + cameraPos.x - gridScreenOffset, (float)GetScreenHeight() * (float)m_gridLineAmount + cameraPos.y), Cell::cellSize),
+                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + game_camera.m_cameraPos.x - gridScreenOffset, 0.0f + game_camera.m_cameraPos.y - gridScreenOffset), Cell::cellSize),
+                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + game_camera.m_cameraPos.x - gridScreenOffset, (float)GetScreenHeight() * (float)m_gridLineAmount + game_camera.m_cameraPos.y), Cell::cellSize),
                      m_thickness,
                      m_color
                  );
