@@ -118,8 +118,16 @@ public:
             } else
             {
                 DrawLineEx(
-                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + game_camera.m_cameraPos.x - gridScreenOffset, 0.0f + game_camera.m_cameraPos.y - gridScreenOffset), Cell::cellSize),
-                     GridConversions::GetWorldGridNormalized(Vector2((float)Cell::cellSize * (float)i + game_camera.m_cameraPos.x - gridScreenOffset, (float)GetScreenHeight() * (float)m_gridLineAmount + game_camera.m_cameraPos.y), Cell::cellSize),
+                     GridConversions::GetWorldGridNormalized(
+                         Vector2((float)Cell::cellSize * (float)i + game_camera.m_cameraPos.x - gridScreenOffset,
+                         0.0f + game_camera.m_cameraPos.y - gridScreenOffset),
+                         Cell::cellSize
+                     ),
+                     GridConversions::GetWorldGridNormalized(
+                         Vector2((float)Cell::cellSize * (float)i + game_camera.m_cameraPos.x - gridScreenOffset,
+                         (float)GetScreenHeight() * (float)m_gridLineAmount + game_camera.m_cameraPos.y),
+                         Cell::cellSize
+                     ),
                      m_thickness,
                      m_color
                  );
