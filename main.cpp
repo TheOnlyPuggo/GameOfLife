@@ -4,9 +4,9 @@
 #include <vector>
 
 #include "raymath.h"
-#include "Headers/RaylibOverloads.h"
 #include "Headers/GameCamera.h"
 #include "Headers/Util.h"
+#include "Headers/RaylibOverloads.h"
 
 #include "Headers/Components.h"
 
@@ -28,7 +28,7 @@ constexpr float cellSize = 25.0f;
 
 // Components Init
 
-GameCamera gameCamera{ 5.0f, 0.3f, 1.0f };
+GameCamera gameCamera{ 2.0f, 0.3f, 1.0f };
 
 GridLine gridLineVertical{
     400,
@@ -44,7 +44,7 @@ GridLine gridLineHorizontal{
     true
 };
 
-Cell placingCell{true, Color{255, 94, 94, 100}};
+Cell placingCell{true, Color{255, 94, 94, 100}, 0.0f};
 
 int main()
 {
@@ -104,13 +104,13 @@ void DrawGame()
         gridLineVertical.Draw(gameCamera);
         gridLineHorizontal.Draw(gameCamera);
 
-        placingCell.Draw();
+        placingCell.Draw(gameCamera);
 
         if (std::size(cells) != 0)
         {
             for (const Cell* cell : cells)
             {
-                cell->Draw();
+                cell->Draw(gameCamera);
             }
         }
 

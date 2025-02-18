@@ -12,36 +12,38 @@ class Cell
 private:
     bool m_beingPlaced{};
     Color m_color{};
+    float m_despawnDistance{};
 
 public:
     static int cellSize;
 
-    Vector2 m_pos{};
+    GridPos m_gridPos{};
 
-    Cell(const bool beingPlaced, const Color color)
+    Cell(const bool beingPlaced, const Color color, float despawnDistance)
     {
         m_beingPlaced = beingPlaced;
         m_color = color;
+        m_despawnDistance = despawnDistance;
     }
 
-    void Update(std::vector<Cell*>& cells, Camera2D camera)
+    void Update(std::vector<Cell*>& cells, const Camera2D &camera)
     {
         if (m_beingPlaced)
         {
-            m_pos = GridConversions::GetWorldGridNormalized(GetScreenToWorld2D(GetMousePosition(), camera), cellSize);
+            m_gridPos = GridConversions::GetWorldToGridSpace(GetScreenToWorld2D(GetMousePosition(), camera), cellSize);
 
             if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
             {
                 for (const Cell* cell : cells)
                 {
-                    if (cell->m_pos == m_pos)
+                    if (cell->m_gridPos == m_gridPos)
                     {
                         return;
                     }
                 }
 
-                auto newCell = new Cell{false, RED}; // Memory should be deallocated in all possible outcomes... hopefully. So ignoring compiler warning.
-                newCell->m_pos = m_pos;
+                auto newCell = new Cell{false, RED, 1500.0f}; // Memory should be deallocated in all possible outcomes... hopefully. So ignoring compiler warning.
+                newCell->m_gridPos = m_gridPos;
                 cells.push_back(newCell);
                 newCell = nullptr;
             }
@@ -51,7 +53,7 @@ public:
                 int i{0};
                 for (const Cell* cell : cells)
                 {
-                    if (cell->m_pos == m_pos)
+                    if (cell->m_gridPos == m_gridPos)
                     {
                         const Cell *cellTrack = cell;
                         cells.erase(cells.begin() + i);
@@ -64,9 +66,26 @@ public:
         }
     }
 
-    void Draw() const
+    void Draw(const GameCamera& gameCamera) const
     {
-        DrawRectangle((int)m_pos.x, (int)m_pos.y, cellSize, cellSize, m_color);
+        Vector2 cameraToGridPos{ gameCamera.m_cameraPos - GridConversions::GetGridToWorldSpace(m_gridPos, cellSize) };
+        float despawnDistanceMod{ m_despawnDistance * 1/gameCamera.GetCurrentMouseZoom() };
+
+        if ( // Checks if both x and y of cameraToGrisPos is greater than despawnDistanceMod and m_beingPlaces is not true
+            !(
+                (cameraToGridPos.x > despawnDistanceMod || cameraToGridPos.x < -despawnDistanceMod)
+                && (cameraToGridPos.y > despawnDistanceMod || cameraToGridPos.y < -despawnDistanceMod)
+                && !m_beingPlaced)
+            )
+        {
+            DrawRectangle(
+                (int)GridConversions::GetGridToWorldSpace(m_gridPos, cellSize).x,
+                (int)GridConversions::GetGridToWorldSpace(m_gridPos, cellSize).y,
+                cellSize,
+                cellSize,
+                m_color
+            );
+        }
     }
 };
 
