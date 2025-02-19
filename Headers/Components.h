@@ -118,9 +118,6 @@ public:
                 {
                     potentialNewCellPositions.push_back(m_gridPos + neighbourGridPos);
                 }
-
-                if (neighbourCount > 4)
-                    break;
             }
 
             if (!(neighbourCount == 2 || neighbourCount == 3))
@@ -172,7 +169,6 @@ public:
         if (readyForCellSpawn)
         {
             SpawnCells(currentStep, cells);
-            std::cout << "Spawned Cells.\n";
         }
     }
 
