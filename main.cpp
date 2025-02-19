@@ -13,6 +13,8 @@
 
 int Cell::cellSize = 25;
 bool Cell::placingActive = true;
+std::vector<GridPos> Cell::cellsToBeSpawned{};
+bool Cell::readyForCellSpawn = false;
 
 int currentStep{0};
 
@@ -48,7 +50,7 @@ GridLine gridLineHorizontal{
     true
 };
 
-Cell placingCell{true, Color{255, 94, 94, 100}, 0.0f};
+Cell placingCell{true, Color{255, 94, 94, 100}, 0.0f, currentStep};
 
 std::vector<Button*> buttons{};
 
@@ -108,16 +110,14 @@ void InitGame()
 
 void UpdateGame()
 {
-    std::cout << currentStep << '\n';
-
-    placingCell.Update(cells, gameCamera.m_camera);
+    placingCell.Update(cells, gameCamera.m_camera, currentStep);
 
     if (std::size(cells) != 0)
     {
         for (Cell* cell : cells)
         {
             if (cell->markedForDeletion == false)
-                cell->Update(cells, gameCamera.m_camera);
+                cell->Update(cells, gameCamera.m_camera, currentStep);
         }
 
         cells.erase(std::remove_if(cells.begin(), cells.end(), [](Cell* cell)

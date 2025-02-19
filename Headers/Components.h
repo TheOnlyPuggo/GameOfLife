@@ -6,6 +6,8 @@
 #define COMPONENTS_H
 
 #include <string_view>
+#include <array>
+#include <vector>
 #include <raylib.h>
 
 #include "GameCamera.h"
@@ -17,22 +19,40 @@ private:
     Color m_color{};
     float m_despawnDistance{};
 
+    int m_savedStep{};
+
 public:
     static int cellSize;
     static bool placingActive;
+    static std::vector<GridPos> cellsToBeSpawned;
+
+    static bool readyForCellSpawn;
+    bool thisCellReadyForSpawn{false};
+
+    std::array<GridPos, 8> cellNeighbourPositions {
+        GridPos(0, -1),
+        GridPos(1, -1),
+        GridPos(1, 0),
+        GridPos(1, 1),
+        GridPos(0, 1),
+        GridPos(-1, 1),
+        GridPos(-1, 0),
+        GridPos(-1, -1)
+    };
 
     mutable bool markedForDeletion{false};
 
     GridPos m_gridPos{};
 
-    Cell(const bool beingPlaced, const Color color, const float despawnDistance)
+    Cell(const bool beingPlaced, const Color color, const float despawnDistance, int savedStep)
     {
         m_beingPlaced = beingPlaced;
         m_color = color;
         m_despawnDistance = despawnDistance;
+        m_savedStep = savedStep;
     }
 
-    void Update(std::vector<Cell*>& cells, const Camera2D &camera)
+    void Update(std::vector<Cell*>& cells, const Camera2D &camera, const int& currentStep)
     {
         if (m_beingPlaced && placingActive)
         {
@@ -48,7 +68,7 @@ public:
                     }
                 }
 
-                auto newCell = new Cell{false, RED, 1500.0f}; // Memory should be deallocated in all possible outcomes... hopefully. So ignoring compiler warning.
+                auto newCell = new Cell{false, RED, 1500.0f, currentStep}; // Memory should be deallocated in all possible outcomes... hopefully. So ignoring compiler warning.
                 newCell->m_gridPos = m_gridPos;
                 cells.push_back(newCell);
                 newCell = nullptr;
@@ -69,6 +89,90 @@ public:
                     ++i;
                 }
             }
+        }
+
+        if (currentStep > m_savedStep && !m_beingPlaced)
+        {
+            ++m_savedStep;
+            int neighbourCount{0};
+
+            std::vector<GridPos> potentialNewCellPositions{};
+
+            for (GridPos neighbourGridPos : cellNeighbourPositions)
+            {
+                bool cellFound{false};
+                for (const Cell* cell : cells)
+                {
+                    if (cell->m_gridPos == m_gridPos)
+                        continue;
+
+                    if (m_gridPos + neighbourGridPos == cell->m_gridPos)
+                    {
+                        ++neighbourCount;
+                        cellFound = true;
+                        break;
+                    }
+                }
+
+                if (!cellFound)
+                {
+                    potentialNewCellPositions.push_back(m_gridPos + neighbourGridPos);
+                }
+
+                if (neighbourCount > 4)
+                    break;
+            }
+
+            if (!(neighbourCount == 2 || neighbourCount == 3))
+                markedForDeletion = true;
+
+            for (const GridPos potentialCellPos : potentialNewCellPositions)
+            {
+                int potentialNeighbourCount{0};
+
+                for (GridPos neighbourGridPos : cellNeighbourPositions)
+                {
+                    for (const Cell* cell : cells)
+                    {
+                        if (potentialCellPos + neighbourGridPos == cell->m_gridPos)
+                        {
+                            ++potentialNeighbourCount;
+                        }
+
+                        if (potentialNeighbourCount > 3)
+                            break;
+                    }
+
+                    if (potentialNeighbourCount > 3)
+                        break;
+                }
+
+                if (potentialNeighbourCount == 3)
+                {
+                    if (std::find(cellsToBeSpawned.begin(), cellsToBeSpawned.end(), potentialCellPos) == cellsToBeSpawned.end())
+                        cellsToBeSpawned.push_back(potentialCellPos);
+                }
+            }
+
+            thisCellReadyForSpawn = true;
+        }
+
+        readyForCellSpawn = true;
+        for (const Cell* cell : cells)
+        {
+            if (cell->thisCellReadyForSpawn == false)
+                readyForCellSpawn = false;
+        }
+
+        if (cells.size() == 0)
+        {
+            readyForCellSpawn = false;
+        }
+
+        if (readyForCellSpawn)
+        {
+            SpawnCells(currentStep, cells);
+            std::cout << "Spawned Cells.\n";
         }
     }
 
@@ -92,6 +196,28 @@ public:
                 m_color
             );
         }
+    }
+
+    static void SpawnCells(const int& currentStep, std::vector<Cell*>& cells)
+    {
+        if (!cellsToBeSpawned.empty() && readyForCellSpawn)
+        {
+            for (GridPos newCellPos : cellsToBeSpawned)
+            {
+                auto newCell = new Cell{false, RED, 1500.0f, currentStep};
+                newCell->m_gridPos = newCellPos;
+                cells.push_back(newCell);
+                newCell = nullptr;
+            }
+        }
+
+        cellsToBeSpawned.clear();
+        for (Cell* cell : cells)
+        {
+            cell->thisCellReadyForSpawn = false;
+        }
+
+        readyForCellSpawn = false;
     }
 };
 
