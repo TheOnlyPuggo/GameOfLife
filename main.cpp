@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <cmath>
 #include <vector>
+#include <array>
 
 #include "raymath.h"
 #include "Headers/GameCamera.h"
@@ -15,10 +16,21 @@ int Cell::cellSize = 25;
 bool Cell::placingActive = true;
 std::vector<GridPos> Cell::cellsToBeSpawned{};
 bool Cell::readyForCellSpawn = false;
+std::array<GridPos, 8> Cell::cellNeighbourPositions = {
+    GridPos(0, -1),
+    GridPos(1, -1),
+    GridPos(1, 0),
+    GridPos(1, 1),
+    GridPos(0, 1),
+    GridPos(-1, 1),
+    GridPos(-1, 0),
+    GridPos(-1, -1)
+};
 
 int currentStep{0};
 
 std::vector<Cell*> cells{};
+std::vector<std::vector<Cell*>> savedCells{};
 
 constexpr int screenWidth { 1000 };
 constexpr int screenHeight { 700 };
@@ -136,9 +148,9 @@ void UpdateGame()
     gameCamera.Update();
 
     // BUTTON STUFF
-    clearButton->Update(cells, currentStep);
-    stepBackButton->Update(cells, currentStep);
-    stepForwardButton->Update(cells, currentStep);
+    clearButton->Update(cells, currentStep, savedCells);
+    stepBackButton->Update(cells, currentStep, savedCells);
+    stepForwardButton->Update(cells, currentStep, savedCells);
 
     int i{0};
     constexpr float margin{40.0f};

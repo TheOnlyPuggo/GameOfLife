@@ -29,16 +29,7 @@ public:
     static bool readyForCellSpawn;
     bool thisCellReadyForSpawn{false};
 
-    std::array<GridPos, 8> cellNeighbourPositions {
-        GridPos(0, -1),
-        GridPos(1, -1),
-        GridPos(1, 0),
-        GridPos(1, 1),
-        GridPos(0, 1),
-        GridPos(-1, 1),
-        GridPos(-1, 0),
-        GridPos(-1, -1)
-    };
+    static std::array<GridPos, 8> cellNeighbourPositions;
 
     mutable bool markedForDeletion{false};
 
@@ -52,7 +43,7 @@ public:
         m_savedStep = savedStep;
     }
 
-    void Update(std::vector<Cell*>& cells, const Camera2D &camera, const int& currentStep)
+    void Update(std::vector<Cell*>& cells, const Camera2D &camera, int& currentStep)
     {
         if (m_beingPlaced && placingActive)
         {
@@ -93,7 +84,8 @@ public:
 
         if (currentStep > m_savedStep && !m_beingPlaced)
         {
-            ++m_savedStep;
+            m_savedStep = currentStep;
+
             int neighbourCount{0};
 
             std::vector<GridPos> potentialNewCellPositions{};
@@ -320,7 +312,7 @@ public:
         m_texture.width *= m_scaleHeightMulti;
     }
 
-    void Update(const std::vector<Cell*>& cells, int& currentStep)
+    void Update(std::vector<Cell*>& cells, int& currentStep, std::vector<std::vector<Cell*>>& savedCells)
     {
         m_btnBounds = Rectangle{ m_btnPos.x, m_btnPos.y, m_sourceRec.width, m_sourceRec.height };
 
@@ -341,11 +333,11 @@ public:
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && m_btnHovered)
         {
             if (m_buttonFunction == CLEAR_CELLS)
-                RemoveAllCells(cells);
+                RemoveAllCells(currentStep, cells, savedCells);
             else if (m_buttonFunction == STEP_BACK)
-                DecrementStep(currentStep);
+                DecrementStep(currentStep, cells, savedCells);
             else if (m_buttonFunction == STEP_FORWARD)
-                IncrementStep(currentStep);
+                IncrementStep(currentStep, cells, savedCells);
         }
     }
 
@@ -368,23 +360,57 @@ public:
     }
 
     // BUTTON FUNCTIONS
-    static void RemoveAllCells(const std::vector<Cell*>& cells)
+    static void RemoveAllCells(int& currentStep, const std::vector<Cell*>& cells, std::vector<std::vector<Cell*>>& savedCells)
     {
         for (const Cell* cell : cells)
         {
             cell->markedForDeletion = true;
+            savedCells.clear();
+            currentStep = 0;
         }
     }
 
-    static void IncrementStep(int& currentStep)
+    static void IncrementStep(int& currentStep, std::vector<Cell*> cells, std::vector<std::vector<Cell*>>& savedCells)
     {
+        if (cells.size() == 0)
+            return;
+
         ++currentStep;
+
+        std::vector<Cell*> newCellMap{};
+        for (Cell* cell : cells)
+        {
+            newCellMap.push_back(new Cell(*cell));
+        }
+
+        savedCells.push_back(newCellMap);
     }
 
-    static void DecrementStep(int& currentStep)
+    static void DecrementStep(int& currentStep, std::vector<Cell*>& cells, std::vector<std::vector<Cell*>>& savedCells)
     {
         if (currentStep != 0)
             --currentStep;
+
+        for (Cell* cell : cells)
+        {
+            delete cell;
+            cell = nullptr;
+        }
+        cells.clear();
+
+        if (savedCells.size() == 0)
+        {
+            savedCells.clear();
+            return;
+        } else
+        {
+            for (Cell* cell : savedCells[currentStep])
+            {
+                cells.push_back(cell);
+            }
+
+            savedCells.pop_back();
+        }
     }
 };
 
