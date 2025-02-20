@@ -27,15 +27,15 @@ public:
     static std::vector<GridPos> cellsToBeSpawned;
 
     static bool readyForCellSpawn;
-    bool thisCellReadyForSpawn{false};
+    bool m_thisCellReadyForSpawn{false};
 
     static std::array<GridPos, 8> cellNeighbourPositions;
 
-    mutable bool markedForDeletion{false};
+    mutable bool m_markedForDeletion{false};
 
     GridPos m_gridPos{};
 
-    Cell(const bool beingPlaced, const Color color, const float despawnDistance, int savedStep)
+    Cell(const bool beingPlaced, const Color color, const float despawnDistance, const int savedStep)
     {
         m_beingPlaced = beingPlaced;
         m_color = color;
@@ -43,8 +43,9 @@ public:
         m_savedStep = savedStep;
     }
 
-    void Update(std::vector<Cell*>& cells, const Camera2D &camera, int& currentStep)
+    void Update(std::vector<Cell*>& cells, const Camera2D &camera, const int& currentStep)
     {
+        // Handles the cell that moves with your cursor, 'placingActive' is for when your hovering over a button
         if (m_beingPlaced && placingActive)
         {
             m_gridPos = GridConversions::GetWorldToGridSpace(GetScreenToWorld2D(GetMousePosition(), camera), cellSize);
@@ -59,7 +60,7 @@ public:
                     }
                 }
 
-                auto newCell = new Cell{false, RED, 1500.0f, currentStep}; // Memory should be deallocated in all possible outcomes... hopefully. So ignoring compiler warning.
+                auto newCell = new Cell{false, BLUE, 1500.0f, currentStep}; // Memory should be deallocated in all possible outcomes... hopefully. So ignoring compiler warning.
                 newCell->m_gridPos = m_gridPos;
                 cells.push_back(newCell);
                 newCell = nullptr;
@@ -82,6 +83,7 @@ public:
             }
         }
 
+        // Runs when step is increased, handles decisions of self-destruction and new cell spawns.
         if (currentStep > m_savedStep && !m_beingPlaced)
         {
             m_savedStep = currentStep;
@@ -113,7 +115,7 @@ public:
             }
 
             if (!(neighbourCount == 2 || neighbourCount == 3))
-                markedForDeletion = true;
+                m_markedForDeletion = true;
 
             for (const GridPos potentialCellPos : potentialNewCellPositions)
             {
@@ -143,13 +145,14 @@ public:
                 }
             }
 
-            thisCellReadyForSpawn = true;
+            m_thisCellReadyForSpawn = true;
         }
 
+        // This section makes sure to separate the previous section from the spawn new cells section, as otherwise they will interfere with the previous sections' outcomes.
         readyForCellSpawn = true;
         for (const Cell* cell : cells)
         {
-            if (cell->thisCellReadyForSpawn == false)
+            if (cell->m_thisCellReadyForSpawn == false)
                 readyForCellSpawn = false;
         }
 
@@ -192,7 +195,7 @@ public:
         {
             for (GridPos newCellPos : cellsToBeSpawned)
             {
-                auto newCell = new Cell{false, RED, 1500.0f, currentStep};
+                auto newCell = new Cell{false, BLUE, 1500.0f, currentStep};
                 newCell->m_gridPos = newCellPos;
                 cells.push_back(newCell);
                 newCell = nullptr;
@@ -202,7 +205,7 @@ public:
         cellsToBeSpawned.clear();
         for (Cell* cell : cells)
         {
-            cell->thisCellReadyForSpawn = false;
+            cell->m_thisCellReadyForSpawn = false;
         }
 
         readyForCellSpawn = false;
@@ -233,6 +236,7 @@ public:
 
     void Draw(const GameCamera& game_camera) const
     {
+        // Draws and moves the grid relative to camera, but at intervals of cellSize on both the x and y-axis to give the illusion the grid isn't moving.
         constexpr float gridScreenOffset{ 2500.0f };
         const float spawnGridAmount = (float)m_gridLineAmount * (1/game_camera.GetCurrentMouseZoom());
 
@@ -288,6 +292,8 @@ private:
     bool m_btnHovered{false};
 
 public:
+    // Enums differentiate the buttons on initialization. Button should've probably been an interface and not a class so that
+    // I'm not passing so much stuff into Update() but too late now.
     enum ButtonFunction
     {
         CLEAR_CELLS, STEP_BACK, STEP_FORWARD, PLAY, PAUSE
@@ -376,7 +382,7 @@ public:
     {
         for (const Cell* cell : cells)
         {
-            cell->markedForDeletion = true;
+            cell->m_markedForDeletion = true;
             savedCells.clear();
             currentStep = 0;
         }
@@ -389,6 +395,7 @@ public:
 
         ++currentStep;
 
+        // Creates and saves the current cell map to savesCells, which is what decrementStep will use to go back in steps.
         std::vector<Cell*> newCellMap{};
         for (Cell* cell : cells)
         {
@@ -415,7 +422,6 @@ public:
         if (savedCells.size() == 0)
         {
             savedCells.clear();
-            return;
         } else
         {
             for (Cell* cell : savedCells[currentStep])

@@ -12,6 +12,7 @@
 
 #include "Headers/Components.h"
 
+// Static Cell Var Initializations
 int Cell::cellSize = 25;
 bool Cell::placingActive = true;
 std::vector<GridPos> Cell::cellsToBeSpawned{};
@@ -27,6 +28,7 @@ std::array<GridPos, 8> Cell::cellNeighbourPositions{
     GridPos(-1, -1)
 };
 
+// Global Vars
 int currentStep{0};
 
 std::vector<Cell*> cells{};
@@ -40,6 +42,7 @@ constexpr int screenWidth { 1000 };
 constexpr int screenHeight { 700 };
 constexpr int targetFPS{ 200 };
 
+// Declaring primary functions ahead
 static void InitGame();
 static void UpdateGame();
 static void DrawGame();
@@ -49,7 +52,6 @@ static void UpdateDrawFrame();
 constexpr float cellSize = 25.0f;
 
 // Components Init
-
 GameCamera gameCamera{ 2.0f, 0.3f, 1.0f };
 
 GridLine gridLineVertical{
@@ -58,7 +60,6 @@ GridLine gridLineVertical{
     LIGHTGRAY,
     false
 };
-
 GridLine gridLineHorizontal{
     400,
     5.0f,
@@ -66,7 +67,7 @@ GridLine gridLineHorizontal{
     true
 };
 
-Cell placingCell{true, Color{255, 94, 94, 100}, 0.0f, currentStep};
+Cell placingCell{true, Color{0, 0, 255, 50}, 0.0f, currentStep};
 
 std::vector<Button*> buttons{};
 
@@ -143,20 +144,20 @@ void InitGame()
 
 void UpdateGame()
 {
-    std::cout << GetFPS() << '\n';
     placingCell.Update(cells, gameCamera.m_camera, currentStep);
 
     if (std::size(cells) != 0)
     {
         for (Cell* cell : cells)
         {
-            if (cell->markedForDeletion == false)
+            if (cell->m_markedForDeletion == false)
                 cell->Update(cells, gameCamera.m_camera, currentStep);
         }
 
-        cells.erase(std::remove_if(cells.begin(), cells.end(), [](Cell* cell)
+        // Delete any cells that have been marked for deletion.
+        cells.erase(std::remove_if(cells.begin(), cells.end(), [](const Cell* cell)
         {
-            if (cell->markedForDeletion)
+            if (cell->m_markedForDeletion)
             {
                 delete cell;
                 cell = nullptr;
@@ -166,10 +167,8 @@ void UpdateGame()
         }), cells.end());
     }
 
-    // CAMERA
     gameCamera.Update();
 
-    // BUTTON STUFF
     for (Button* button : buttons)
     {
         button->Update(
@@ -183,6 +182,7 @@ void UpdateGame()
         );
     }
 
+    // Lays out the buttons in the button array automatically
     int i{0};
     constexpr float margin{40.0f};
     constexpr float distanceFromBottom{80.0f};
@@ -190,13 +190,14 @@ void UpdateGame()
     for (Button* button : buttons)
     {
         button->m_btnPos = Vector2(
-            ((float)GetScreenWidth()/2.0f + (button->GetWidth() + margin) * i) - totalButtonsLength/2.0f + margin/2.0f,
+            ((float)GetScreenWidth()/2.0f + (button->GetWidth() + margin) * (float)i) - totalButtonsLength/2.0f + margin/2.0f,
             (float)GetScreenHeight() - distanceFromBottom
         );
 
         ++i;
     }
 
+    // Increment steps at a fixed player-decided interval is gamePaused is false
     if (gamePaused == true)
         timeElapsed = GetTime();
 
@@ -245,7 +246,7 @@ void DrawGame()
         button->Draw();
     }
 
-    // STEP TEXT
+    // Text Draws
     const std::string stepText{ "Step: " };
     const std::string speedText{ "Speed: " };
     DrawText((stepText + std::to_string(currentStep)).c_str(), 30, 30, 32, BLACK);
@@ -256,6 +257,7 @@ void DrawGame()
 
 void UnloadGame()
 {
+    // Deletes all cell and button objects on game end
     for (const Cell* cell : cells)
     {
         delete cell;
