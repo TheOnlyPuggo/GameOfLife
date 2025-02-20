@@ -48,7 +48,7 @@ public:
         // Handles the cell that moves with your cursor, 'placingActive' is for when your hovering over a button
         if (m_beingPlaced && placingActive)
         {
-            m_gridPos = GridConversions::GetWorldToGridSpace(GetScreenToWorld2D(GetMousePosition(), camera), cellSize);
+            m_gridPos = GridConversions::GetWorldToGridSpace((GetScreenToWorld2D(GetMousePosition(), camera)), cellSize);
 
             if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
             {
@@ -362,9 +362,9 @@ public:
     void Draw()
     {
         if (!m_btnHovered)
-            DrawTextureRec(m_texture, m_sourceRec, (Vector2){m_btnBounds.x, m_btnBounds.y}, WHITE);
+            DrawTextureRec(m_texture, m_sourceRec, {m_btnBounds.x, m_btnBounds.y}, WHITE);
         else
-            DrawTextureRec(m_texture, m_sourceRec, (Vector2){m_btnBounds.x, m_btnBounds.y}, Color(255/2,255/2,255/2,100));
+            DrawTextureRec(m_texture, m_sourceRec, {m_btnBounds.x, m_btnBounds.y}, Color(255/2,255/2,255/2,100));
     }
 
     float GetWidth() const

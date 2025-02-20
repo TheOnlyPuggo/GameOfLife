@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <array>
+#include <string>
 
 #include "raymath.h"
 #include "Headers/GameCamera.h"
