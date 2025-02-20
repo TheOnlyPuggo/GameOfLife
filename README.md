@@ -23,3 +23,10 @@
 <h2>Note:</h2>
 <p>The canvas is of an infinite size, so every cell is instantiated and deleted and not
 <br>preloaded on program start. Basically placing a lot will be slow and have computer go brrr.</p>
+
+<br>
+
+<h2>Known Issues:</h2>
+<p>If you place a lot of cells at once while iterating through the 
+<br>steps (basically if you drag place a bunch of cells while the simulation 
+<br>isn't paused), cell patterns that aren't meant to disintegrate start doing so.</p>
