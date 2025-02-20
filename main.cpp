@@ -193,6 +193,10 @@ void DrawGame()
     stepBackButton->Draw();
     stepForwardButton->Draw();
 
+    // STEP TEXT
+    std::string stepText{ "Step: " };
+    DrawText((stepText + std::to_string(currentStep)).c_str(), 30, 30, 32, BLACK);
+
     EndDrawing();
 }
 

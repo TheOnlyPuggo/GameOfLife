@@ -388,8 +388,10 @@ public:
 
     static void DecrementStep(int& currentStep, std::vector<Cell*>& cells, std::vector<std::vector<Cell*>>& savedCells)
     {
-        if (currentStep != 0)
-            --currentStep;
+        if (currentStep == 0)
+            return;
+
+        --currentStep;
 
         for (Cell* cell : cells)
         {
