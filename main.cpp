@@ -16,7 +16,7 @@ int Cell::cellSize = 25;
 bool Cell::placingActive = true;
 std::vector<GridPos> Cell::cellsToBeSpawned{};
 bool Cell::readyForCellSpawn = false;
-std::array<GridPos, 8> Cell::cellNeighbourPositions = {
+std::array<GridPos, 8> Cell::cellNeighbourPositions{
     GridPos(0, -1),
     GridPos(1, -1),
     GridPos(1, 0),
@@ -31,6 +31,10 @@ int currentStep{0};
 
 std::vector<Cell*> cells{};
 std::vector<std::vector<Cell*>> savedCells{};
+
+bool gamePaused{true};
+double timeElapsed{};
+int timeSpeed{10};
 
 constexpr int screenWidth { 1000 };
 constexpr int screenHeight { 700 };
@@ -82,6 +86,22 @@ Button* stepForwardButton = new Button{
     Button::STEP_FORWARD
 };
 
+Button* playButton = new Button{
+    "../Assets/play-button.png",
+    Rectangle(0.0f, 0.0f, 64.0f, 64.0f),
+    2,
+    2,
+    Button::PLAY
+};
+
+Button* pauseButton = new Button{
+    "../Assets/pause-button.png",
+    Rectangle(0.0f, 0.0f, 64.0f, 64.0f),
+    2,
+    2,
+    Button::PAUSE
+};
+
 Button* clearButton = new Button{
     "../Assets/bin-icon.png",
     Rectangle(0.0f, 0.0f, 64.0f, 64.0f),
@@ -110,18 +130,20 @@ int main()
 
 void InitGame()
 {
-    gameCamera.Init();
-    stepBackButton->Init();
-    stepForwardButton->Init();
-    clearButton->Init();
-
     buttons.push_back(stepBackButton);
     buttons.push_back(stepForwardButton);
+    buttons.push_back(playButton);
     buttons.push_back(clearButton);
+
+    for (Button* button : buttons)
+    {
+        button->Init();
+    }
 }
 
 void UpdateGame()
 {
+    std::cout << GetFPS() << '\n';
     placingCell.Update(cells, gameCamera.m_camera, currentStep);
 
     if (std::size(cells) != 0)
@@ -148,9 +170,18 @@ void UpdateGame()
     gameCamera.Update();
 
     // BUTTON STUFF
-    clearButton->Update(cells, currentStep, savedCells);
-    stepBackButton->Update(cells, currentStep, savedCells);
-    stepForwardButton->Update(cells, currentStep, savedCells);
+    for (Button* button : buttons)
+    {
+        button->Update(
+            cells,
+            currentStep,
+            savedCells,
+            buttons,
+            playButton,
+            pauseButton,
+            gamePaused
+        );
+    }
 
     int i{0};
     constexpr float margin{40.0f};
@@ -164,6 +195,26 @@ void UpdateGame()
         );
 
         ++i;
+    }
+
+    if (gamePaused == true)
+        timeElapsed = GetTime();
+
+    if (gamePaused == false) {
+        if (GetTime() - timeElapsed > (1/(double)timeSpeed))
+        {
+            timeElapsed = GetTime();
+            Button::IncrementStep(currentStep, cells, savedCells);
+        }
+    }
+
+    if (IsKeyPressed(KEY_EQUAL) || IsKeyPressedRepeat(KEY_EQUAL))
+    {
+        ++timeSpeed;
+    }
+    if ((IsKeyPressed(KEY_MINUS) || IsKeyPressedRepeat(KEY_MINUS)) && timeSpeed != 0)
+    {
+        --timeSpeed;
     }
 }
 
@@ -189,13 +240,16 @@ void DrawGame()
 
     EndMode2D();
 
-    clearButton->Draw();
-    stepBackButton->Draw();
-    stepForwardButton->Draw();
+    for (Button* button : buttons)
+    {
+        button->Draw();
+    }
 
     // STEP TEXT
-    std::string stepText{ "Step: " };
+    const std::string stepText{ "Step: " };
+    const std::string speedText{ "Speed: " };
     DrawText((stepText + std::to_string(currentStep)).c_str(), 30, 30, 32, BLACK);
+    DrawText((speedText + std::to_string(timeSpeed)).c_str(), 30, 60, 32, BLACK);
 
     EndDrawing();
 }

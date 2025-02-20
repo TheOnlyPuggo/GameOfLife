@@ -290,7 +290,7 @@ private:
 public:
     enum ButtonFunction
     {
-        CLEAR_CELLS, STEP_BACK, STEP_FORWARD
+        CLEAR_CELLS, STEP_BACK, STEP_FORWARD, PLAY, PAUSE
     };
 
     Vector2 m_btnPos{};
@@ -312,7 +312,15 @@ public:
         m_texture.width *= m_scaleHeightMulti;
     }
 
-    void Update(std::vector<Cell*>& cells, int& currentStep, std::vector<std::vector<Cell*>>& savedCells)
+    void Update(
+        std::vector<Cell*>& cells,
+        int& currentStep,
+        std::vector<std::vector<Cell*>>& savedCells,
+        std::vector<Button*>& buttons,
+        Button*& playButton,
+        Button*& pauseButton,
+        bool& gamePaused
+    )
     {
         m_btnBounds = Rectangle{ m_btnPos.x, m_btnPos.y, m_sourceRec.width, m_sourceRec.height };
 
@@ -338,6 +346,10 @@ public:
                 DecrementStep(currentStep, cells, savedCells);
             else if (m_buttonFunction == STEP_FORWARD)
                 IncrementStep(currentStep, cells, savedCells);
+            else if (m_buttonFunction == PLAY)
+                PlaySteps(buttons, pauseButton, gamePaused);
+            else if (m_buttonFunction == PAUSE)
+                PauseSteps(buttons, playButton, gamePaused);
         }
     }
 
@@ -413,6 +425,22 @@ public:
 
             savedCells.pop_back();
         }
+    }
+
+    static void PlaySteps(std::vector<Button*>& buttons, Button*& pauseButton, bool& gamePaused)
+    {
+        buttons.erase(buttons.begin() + 2);
+        buttons.insert(buttons.begin() + 2, pauseButton);
+        pauseButton->Init();
+        gamePaused = false;
+    }
+
+    static void PauseSteps(std::vector<Button*>& buttons, Button*& playButton, bool& gamePaused)
+    {
+        buttons.erase(buttons.begin() + 2);
+        buttons.insert(buttons.begin() + 2, playButton);
+        playButton->Init();
+        gamePaused = true;
     }
 };
 
