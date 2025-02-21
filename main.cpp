@@ -38,6 +38,7 @@ std::vector<std::vector<Cell*>> savedCells{};
 bool gamePaused{true};
 double timeElapsed{};
 int timeSpeed{10};
+bool reversed{false};
 
 constexpr int screenWidth { 1000 };
 constexpr int screenHeight { 700 };
@@ -207,8 +208,16 @@ void UpdateGame()
     if (gamePaused == false) {
         if (GetTime() - timeElapsed > (1/(double)timeSpeed))
         {
-            timeElapsed = GetTime();
-            Button::IncrementStep(currentStep, cells, savedCells);
+            if (!reversed)
+            {
+                timeElapsed = GetTime();
+                Button::IncrementStep(currentStep, cells, savedCells);
+            }
+            else
+            {
+                timeElapsed = GetTime();
+                Button::DecrementStep(currentStep, cells, savedCells);
+            }
         }
     }
 
@@ -219,6 +228,10 @@ void UpdateGame()
     if ((IsKeyPressed(KEY_MINUS) || IsKeyPressedRepeat(KEY_MINUS)) && timeSpeed != 0)
     {
         --timeSpeed;
+    }
+    if (IsKeyPressed(KEY_R))
+    {
+        reversed = !reversed;
     }
 }
 
@@ -252,8 +265,13 @@ void DrawGame()
     // Text Draws
     const std::string stepText{ "Step: " };
     const std::string speedText{ "Speed: " };
+    const std::string reversedText{ "Reversed: " };
     DrawText((stepText + std::to_string(currentStep)).c_str(), 30, 30, 32, BLACK);
     DrawText((speedText + std::to_string(timeSpeed)).c_str(), 30, 60, 32, BLACK);
+    if (reversed)
+        DrawText((reversedText + "True").c_str(), 30, 90, 32, BLACK);
+    else
+        DrawText((reversedText + "False").c_str(), 30, 90, 32, BLACK);
 
     EndDrawing();
 }

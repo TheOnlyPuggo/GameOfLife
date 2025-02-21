@@ -11,6 +11,7 @@
 <p><b>Middle Mouse Button Held:</b> Pans the camera.</p>
 <p><b>Plus Key:</b> Increases speed of play mode.</p>
 <p><b>Minus Key:</b> Decreases speed of play mode.</p>
+<p><b>R Key:</b> Reverses the steps of the simulation.</p>
 
 <br>
 
@@ -25,8 +26,3 @@
 <br>preloaded on program start. Basically placing a lot will be slow and have computer go brrr.</p>
 
 <br>
-
-<h2>Known Issues:</h2>
-<p>If you place a lot of cells at once while iterating through the 
-<br>steps (basically if you drag place a bunch of cells while the simulation 
-<br>isn't paused), cell patterns that aren't meant to disintegrate start doing so.</p>
