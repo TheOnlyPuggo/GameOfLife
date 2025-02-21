@@ -273,6 +273,9 @@ void DrawGame()
     else
         DrawText((reversedText + "False").c_str(), 30, 90, 32, BLACK);
 
+    GridPos gridText{ GridConversions::GetWorldToGridSpace((GetScreenToWorld2D(GetMousePosition(), gameCamera.m_camera)), cellSize) };
+    DrawText((std::to_string(gridText.x) + " " + std::to_string(gridText.y)).c_str(), 30, 150, 32, BLACK);
+
     EndDrawing();
 }
 
