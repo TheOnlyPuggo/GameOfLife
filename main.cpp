@@ -132,6 +132,8 @@ int main()
 
 void InitGame()
 {
+    SetWindowIcon(LoadImage("../Assets/WindowIcon.png"));
+
     buttons.push_back(stepBackButton);
     buttons.push_back(stepForwardButton);
     buttons.push_back(playButton);
@@ -145,14 +147,14 @@ void InitGame()
 
 void UpdateGame()
 {
-    placingCell.Update(cells, gameCamera.m_camera, currentStep);
+    placingCell.Update(cells, gameCamera.m_camera, currentStep, gamePaused);
 
     if (std::size(cells) != 0)
     {
         for (Cell* cell : cells)
         {
             if (cell->m_markedForDeletion == false)
-                cell->Update(cells, gameCamera.m_camera, currentStep);
+                cell->Update(cells, gameCamera.m_camera, currentStep, gamePaused);
         }
 
         // Delete any cells that have been marked for deletion.
@@ -230,13 +232,13 @@ void DrawGame()
     gridLineVertical.Draw(gameCamera);
     gridLineHorizontal.Draw(gameCamera);
 
-    placingCell.Draw(gameCamera);
+    placingCell.Draw(gameCamera, gamePaused);
 
     if (std::size(cells) != 0)
     {
         for (const Cell* cell : cells)
         {
-            cell->Draw(gameCamera);
+            cell->Draw(gameCamera, gamePaused);
         }
     }
 

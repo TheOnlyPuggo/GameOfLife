@@ -43,10 +43,10 @@ public:
         m_savedStep = savedStep;
     }
 
-    void Update(std::vector<Cell*>& cells, const Camera2D &camera, const int& currentStep)
+    void Update(std::vector<Cell*>& cells, const Camera2D &camera, const int& currentStep, const bool& gamePaused)
     {
         // Handles the cell that moves with your cursor, 'placingActive' is for when your hovering over a button
-        if (m_beingPlaced && placingActive)
+        if (m_beingPlaced && placingActive && gamePaused)
         {
             m_gridPos = GridConversions::GetWorldToGridSpace((GetScreenToWorld2D(GetMousePosition(), camera)), cellSize);
 
@@ -167,8 +167,11 @@ public:
         }
     }
 
-    void Draw(const GameCamera& gameCamera) const
+    void Draw(const GameCamera& gameCamera, bool& gamePaused) const
     {
+        if (m_beingPlaced && !gamePaused)
+            return;
+
         Vector2 cameraToGridPos{ (gameCamera.m_cameraPos + gameCamera.m_camera.offset) - GridConversions::GetGridToWorldSpace(m_gridPos, cellSize) };
         float despawnDistanceMod{ m_despawnDistance * 1/gameCamera.GetCurrentMouseZoom() };
 
