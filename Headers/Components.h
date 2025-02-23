@@ -295,8 +295,6 @@ private:
     bool m_btnHovered{false};
 
 public:
-    // Enums differentiate the buttons on initialization. Button should've probably been an interface and not a class so that
-    // I'm not passing so much stuff into Update() but too late now.
     enum ButtonFunction
     {
         CLEAR_CELLS, STEP_BACK, STEP_FORWARD, PLAY, PAUSE
